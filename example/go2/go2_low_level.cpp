@@ -132,10 +132,12 @@ void Custom::LowStateMessageHandler(const void* message)
 double jointLinearInterpolation(double initPos, double targetPos, double rate)
 {
     double p;
-    rate = std::min(std::max(rate, 0.0), 1.0);
-    p = initPos * (1 - rate) + targetPos * rate;
+    rate = std::min(std::max(rate, 0.0), 1.0); //clips rate to be in [0,1]
+    p = initPos * (1 - rate) + targetPos * rate; //p is hence an interpolated position between target and init
     return p;
 }
+
+
 
 void Custom::LowCmdWrite()
 {
@@ -155,7 +157,7 @@ void Custom::LowCmdWrite()
         {
             rate_count++;
 
-            double rate = rate_count / 200.0; // needs count to 200
+            double rate = rate_count / 200.0; // needs count to 200. This interpolates 199 samples between inital and target positions
             Kp[0] = 5.0; Kp[1] = 5.0; Kp[2] = 5.0;
             Kd[0] = 1.0; Kd[1] = 1.0; Kd[2] = 1.0;
 
@@ -201,7 +203,7 @@ int main(int argc, const char** argv)
         exit(-1); 
     }
 
-    ChannelFactory::Instance()->Init(0, argv[1]);
+    ChannelFactory::Instance()->Init(0, argv[1]); //sets up the communication channel between go2 and computer
 
     Custom custom;
     custom.Init();
